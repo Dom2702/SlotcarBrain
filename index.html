@@ -66,9 +66,14 @@
             background: none;
             border: none;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.8rem; /* Vergrößerter Zurück-Pfeil */
+            font-weight: bold;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 0 12px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .container {
@@ -188,7 +193,7 @@
         }
 
         .modal.active {
-            display: flex;
+            display: flex !important;
         }
 
         .modal-content {
@@ -352,7 +357,7 @@
             margin-bottom: 8px;
         }
 
-        /* --- STYLES SCHNEIDER / ACHSBOCKRECHNER --- */
+        /* --- STYLES ACHSBOCKRECHNER --- */
         .info-box-achsbock {
             background-color: #f1f8e9;
             border-left: 4px solid #7cb342;
@@ -442,7 +447,7 @@
             <h1 id="app-title">SlotcarBrain</h1>
             <div class="subtitle" id="app-subtitle">v2.0 by DM-Technik</div>
         </div>
-        <div style="width: 30px;"></div>
+        <div style="width: 40px;"></div>
     </header>
 
     <!-- MAIN HOME SCREEN -->
@@ -461,8 +466,7 @@
             <h2>Meine Slotcar Garage</h2>
         </div>
 
-        <button class="btn" onclick="openFahrzeugAnlegen()">➕ Neues Slotcar anlegen</button>
-        <button class="btn" onclick="openSammlung()">🎴 Sammlung anzeigen (<span id="car-count">0</span>)</button>
+        <button class="btn" onclick="openPage('screen-sammlung')">🚗 Fahrzeuge (<span id="car-count">0</span>)</button>
         <button class="btn btn-secondary" onclick="openPage('screen-settings')">⚙️ Einstellungen</button>
 
         <button class="btn" style="margin-top: 50px;" onclick="openPage('screen-bestzeiten')">⏱️ Meine Bestzeiten</button>
@@ -472,6 +476,14 @@
         <button class="btn" onclick="openPage('screen-helferlein')">🧰 Helferlein</button>
 
         <button class="btn btn-export-yellow" onclick="exportData()">💾 Alle Daten sichern</button>
+    </div>
+
+    <!-- SEITE: SAMMLUNG / FAHRZEUGE (VOLLBILD) -->
+    <div class="container" id="screen-sammlung" style="display: none;">
+        <div class="section-title">Meine Sammlung</div>
+        <div id="sammlung-body">
+            <!-- Dynamische Sammlung -->
+        </div>
     </div>
 
     <!-- SEITE: HELFERLEIN ÜBERSICHT -->
@@ -556,10 +568,6 @@
 
     <!-- SEITE: EINSTELLUNGEN -->
     <div class="container" id="screen-settings" style="display: none;">
-        <div class="card" onclick="openMaskenEditor()" style="cursor: pointer;">
-            <strong>✏️ Eingabemaske anpassen</strong>
-            <p style="font-size: 0.85rem; color: #666;">Felder hinzufügen, entfernen oder umbenennen</p>
-        </div>
         <div class="card" onclick="exportData()" style="cursor: pointer;">
             <strong>📤 Daten exportieren</strong>
             <p style="font-size: 0.85rem; color: #666;">Erstelle ein Backup deiner Fahrzeuge und Einstellungen (JSON)</p>
@@ -623,7 +631,7 @@
                 <option value="bestzeit">Sortieren nach Bestzeit</option>
                 <option value="spur">Sortieren nach Spur</option>
             </select>
-            <button class="btn btn-small" onclick="openBestzeitModal()">➕ Neu</button>
+            <button class="btn btn-small" type="button" onclick="openBestzeitModal()">➕ Neu</button>
         </div>
         <div id="bestzeiten-liste"></div>
     </div>
@@ -672,42 +680,29 @@
         </div>
     </div>
 
-    <!-- MODAL: SAMMLUNG / DETAILS -->
-    <div class="modal" id="modal-sammlung">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Meine Sammlung</h3>
-                <button class="header-btn" onclick="closeModal('modal-sammlung')">✖</button>
-            </div>
-            <div class="modal-body" id="sammlung-body">
-                <!-- Dynamische Sammlung -->
-            </div>
-        </div>
-    </div>
-
     <!-- MODAL: BESTZEIT ERFASSEN -->
     <div class="modal" id="modal-bestzeit">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="bestzeit-modal-title">Neue Bestzeit eintragen</h3>
+                <h3 id="bz-modal-title">Neue Bestzeit eintragen</h3>
                 <button class="header-btn" onclick="closeModal('modal-bestzeit')">✖</button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="bz-index">
                 <div class="form-group">
-                    <label>Ort / Rennbahn *</label>
+                    <label for="bz-ort">Ort / Rennbahn *</label>
                     <input type="text" id="bz-ort" class="form-control" placeholder="z.B. Clubstrecke Köln">
                 </div>
                 <div class="form-group">
-                    <label>Fahrzeug *</label>
+                    <label for="bz-fahrzeug">Fahrzeug *</label>
                     <input type="text" id="bz-fahrzeug" class="form-control" placeholder="z.B. Porsche 911 GT3">
                 </div>
                 <div class="form-group">
-                    <label>Bestzeit</label>
+                    <label for="bz-zeit">Bestzeit</label>
                     <input type="text" id="bz-zeit" class="form-control" placeholder="z.B. 6.432 s">
                 </div>
                 <div class="form-group">
-                    <label>Spur</label>
+                    <label for="bz-spur">Spur</label>
                     <input type="text" id="bz-spur" class="form-control" placeholder="z.B. Spur 3">
                 </div>
             </div>
@@ -760,38 +755,31 @@
                     <h5>2. Lizenzbeschränkungen</h5>
                     <p>Es ist dir untersagt:</p>
                     <ul>
-                        <li>Die App zu dekompilieren, zu disassemblieren, zu reverse-engineern oder zu versuchen, den Quellcode der App abzuleiten (sofern dies nicht durch zwingendes Recht ausdrücklich gestattet ist).</li>
+                        <li>Die App zu dekompilieren, zu disassemblieren, zu reverse-engineern oder zu versuchen, den Quellcode der App abzuleiten.</li>
                         <li>Die App zu vermieten, zu verleasen, zu unterlizenzieren oder kommerziell zu vertreiben.</li>
                         <li>Änderungen, Übersetzungen oder abgeleitete Werke der App zu erstellen.</li>
                         <li>Urheberrechts- oder Eigentumshinweise aus der App zu entfernen oder zu verändern.</li>
                     </ul>
 
                     <h5>3. Eigentum</h5>
-                    <p>Die App (einschließlich aller Grafiken, des Designs, der Benutzeroberfläche und des zugrundeliegenden Codes) ist geistiges Eigentum des Entwicklers und durch Urhebergesetze geschützt. Dir wird lediglich das Nutzungsrecht gemäß dieser EULA eingeräumt, jedoch kein Eigentum an der App.</p>
+                    <p>Die App (einschließlich aller Grafiken, des Designs, der Benutzeroberfläche und des zugrundeliegenden Codes) ist geistiges Eigentum des Entwicklers und durch Urhebergesetze geschützt.</p>
 
                     <h4>TEIL 2: Allgemeine Geschäftsbedingungen (Nutzungsbedingungen)</h4>
                     <h5>1. Funktionsweise & Datenverarbeitung</h5>
                     <p>Die App dient der Verwaltung von Notizen und Listen.</p>
                     <p>Die App speichert alle Daten ausschließlich lokal auf deinem Endgerät. Es findet keine Datenübertragung an Server des Entwicklers statt.</p>
-                    <p>Du bist selbst für die Sicherung deiner Daten (z. B. über die Export-/Backup-Funktion) verantwortlich. Der Entwickler haftet nicht für Datenverluste, die durch Geräteschäden, Software-Resets oder Deinstallation der App entstehen.</p>
 
                     <h5>2. Kosten & Verfügbarkeit</h5>
                     <p>Die Nutzung der App erfolgt – sofern nicht anders angegeben – kostenlos.</p>
-                    <p>Der Entwickler übernimmt keine Garantie für die ständige Verfügbarkeit, Fehlerfreiheit oder permanente Weiterentwicklung der App. Die Bereitstellung kann jederzeit ohne Vorankündigung geändert oder eingestellt werden.</p>
 
                     <h5>3. Gewährleistungsausschluss (Disclaimer)</h5>
-                    <p>Die App wird im „Ist-Zustand“ („as is“) und „wie verfügbar“ bereitgestellt, ohne ausdrückliche oder stillschweigende Gewährleistungen jeglicher Art.</p>
-                    <p>Der Entwickler übernimmt keine Garantie dafür, dass die App deinen Anforderungen entspricht, ununterbrochen oder fehlerfrei läuft oder dass eventuelle Programmfehler korrigiert werden.</p>
+                    <p>Die App wird im „Ist-Zustand“ („as is“) und „wie verfügbar“ bereitgestellt.</p>
 
                     <h5>4. Haftungsbeschränkung</h5>
                     <p>Die Haftung des Entwicklers für leichte Fahrlässigkeit ist – soweit gesetzlich zulässig – ausgeschlossen.</p>
-                    <p>Der Entwickler haftet nicht für direkte oder indirekte Schäden, Datenverluste, entgangenen Gewinn oder Sachschäden, die aus der Nutzung oder der Unmöglichkeit der Nutzung der App entstehen.</p>
 
                     <h5>5. Anwendbares Recht</h5>
                     <p>Es gilt das Recht des Landes, in dem der Entwickler seinen Wohnsitz hat.</p>
-
-                    <h5>6. Änderungen der Bedingungen</h5>
-                    <p>Der Entwickler behält sich das Recht vor, diese AGB/EULA jederzeit zu aktualisieren.</p>
 
                     <hr style="margin: 15px 0;">
 
@@ -807,15 +795,6 @@
 
                     <h5>3. Lokale Datenspeicherung</h5>
                     <p>Alle Daten werden ausschließlich lokal gespeichert.</p>
-
-                    <h5>4. Export- und Import-Funktion</h5>
-                    <p>Backup-Funktion greift auf das lokale Dateisystem zu.</p>
-
-                    <h5>5. Berechtigungen</h5>
-                    <p>Speicher/Dateisystem für Backup-Dateien.</p>
-
-                    <h5>6. Deine Rechte</h5>
-                    <p>Verwaltung/Löschung direkt in der App oder den Systemeinstellungen.</p>
 
                     <hr style="margin: 15px 0;">
 
@@ -861,13 +840,11 @@
             checkAGB();
         }
 
-        // --- IPHONE ANLEITUNG EIN-/AUSKLAPPEN ---
         function toggleIOSHint() {
             const hint = document.getElementById('ios-instruction');
             hint.style.display = hint.style.display === 'block' ? 'none' : 'block';
         }
 
-        // --- SERVICE WORKER REGISTRIERUNG ---
         function registerServiceWorker() {
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('https://dom2702.github.io/SlotcarBrain/sw.js')
@@ -876,14 +853,11 @@
             }
         }
 
-        // --- PERSISTENTEN SPEICHER ANFORDERN ---
         function requestPersistentStorage() {
             if (navigator.storage && navigator.storage.persist) {
                 navigator.storage.persist().then(granted => {
                     if (granted) {
-                        console.log("Super! Safari hat zugestimmt, die Daten NICHT automatisch zu löschen.");
-                    } else {
-                        console.log("Safari wird die Daten nach 7 Tagen Inaktivität löschen.");
+                        console.log("Speicherzugriff bestätigt.");
                     }
                 });
             }
@@ -894,13 +868,7 @@
             localStorage.setItem(key, JSON.stringify(data)); 
         }
 
-        function loadDataFromKey(key) { 
-            return JSON.parse(localStorage.getItem(key)) || []; 
-        }
-
         function loadData() {
-            const agb = localStorage.getItem('agb_akzeptiert');
-            
             const felder = localStorage.getItem('masken_felder');
             aktiveFelder = felder ? JSON.parse(felder) : [...kStandardFelder];
 
@@ -967,6 +935,7 @@
             document.getElementById(pageId).style.display = 'block';
             document.getElementById('nav-back-btn').style.visibility = navigationStack.length > 1 ? 'visible' : 'hidden';
 
+            if(pageId === 'screen-sammlung') renderSammlung();
             if(pageId === 'screen-bestzeiten') renderBestzeiten();
             if(pageId === 'screen-einkauf') renderEinkaufsliste();
         }
@@ -983,8 +952,21 @@
         }
 
         // --- MODAL UTILS ---
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function openModal(id) { 
+            const m = document.getElementById(id);
+            if(m) {
+                m.style.display = 'flex';
+                m.classList.add('active');
+            }
+        }
+        
+        function closeModal(id) { 
+            const m = document.getElementById(id);
+            if(m) {
+                m.style.display = 'none';
+                m.classList.remove('active');
+            }
+        }
 
         // --- FAHRZEUG VERWALTUNG ---
         function openFahrzeugAnlegen() {
@@ -1045,25 +1027,24 @@
 
             closeModal('modal-fahrzeug');
             updateHomeUI();
-            if (document.getElementById('modal-sammlung').classList.contains('active')) {
-                renderSammlung();
-            }
+            renderSammlung();
         }
 
         // --- SAMMLUNG ---
-        function openSammlung() {
-            renderSammlung();
-            openModal('modal-sammlung');
-        }
-
         function renderSammlung() {
             const container = document.getElementById('sammlung-body');
+            
+            let html = `
+                <button class="btn btn-secondary" style="margin-bottom: 12px;" onclick="openMaskenEditor()">✏️ Eingabemaske anpassen</button>
+                <button class="btn" style="margin-bottom: 16px;" onclick="openFahrzeugAnlegen()">➕ Neues Slotcar anlegen</button>
+            `;
+
             if (slotcarListe.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#666;">Noch keine Fahrzeuge angelegt.</p>';
+                html += '<p style="text-align:center; color:#666; margin-top:20px;">Noch keine Fahrzeuge angelegt.</p>';
+                container.innerHTML = html;
                 return;
             }
 
-            let html = '';
             slotcarListe.forEach((car, index) => {
                 html += `
                     <div class="card" onclick="openFahrzeugDetails(${index})" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
@@ -1075,6 +1056,7 @@
                     </div>
                 `;
             });
+
             container.innerHTML = html;
         }
 
@@ -1083,7 +1065,7 @@
             const container = document.getElementById('sammlung-body');
 
             let html = `
-                <button class="btn btn-small btn-secondary" onclick="renderSammlung()" style="margin-bottom:12px;">← Zurück zur Liste</button>
+                <button class="btn btn-small btn-secondary" onclick="renderSammlung()" style="margin-bottom:12px; font-size:1.1rem; padding:8px 14px;">← Zurück zur Liste</button>
                 <h3>${car.fahrzeug}</h3>
                 <div style="margin: 12px 0;">
                     <button class="btn-small" onclick="editFahrzeug(${index})">✏️ Bearbeiten</button>
@@ -1212,12 +1194,12 @@
                     const v2 = parseFloat(b[sortKey].replace(/[^0-9.]/g, '')) || 99999;
                     return v1 - v2;
                 }
-                return a[sortKey].localeCompare(b[sortKey]);
+                return (a[sortKey] || '').localeCompare(b[sortKey] || '');
             });
 
             const container = document.getElementById('bestzeiten-liste');
             if (bestzeitenListe.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:#666;">Noch keine Bestzeiten eingetragen.</p>';
+                container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">Noch keine Bestzeiten eingetragen.</p>';
                 return;
             }
 
@@ -1233,7 +1215,7 @@
                             <div style="font-weight:bold;">${item.bestzeit || '-'}</div>
                             <div style="font-size:0.8rem; color:#666;">${item.spur || '-'}</div>
                         </div>
-                        <div>
+                        <div style="display:flex; gap: 4px;">
                             <button class="btn-small" onclick="openBestzeitModal(${index})">✏️</button>
                             <button class="btn-small btn-danger" onclick="deleteBestzeit(${index})">🗑️</button>
                         </div>
@@ -1244,15 +1226,17 @@
         }
 
         function openBestzeitModal(index = null) {
-            document.getElementById('bz-index').value = index !== null ? index : '';
-            document.getElementById('bz-modal-title').innerText = index !== null ? "Bestzeit bearbeiten" : "Neue Bestzeit eintragen";
+            const isEdit = (index !== null && index !== undefined && index !== '');
             
-            if (index !== null) {
+            document.getElementById('bz-index').value = isEdit ? index : '';
+            document.getElementById('bz-modal-title').innerText = isEdit ? "Bestzeit bearbeiten" : "Neue Bestzeit eintragen";
+            
+            if (isEdit && bestzeitenListe[index]) {
                 const bz = bestzeitenListe[index];
-                document.getElementById('bz-ort').value = bz.ort;
-                document.getElementById('bz-fahrzeug').value = bz.fahrzeug;
-                document.getElementById('bz-zeit').value = bz.bestzeit;
-                document.getElementById('bz-spur').value = bz.spur;
+                document.getElementById('bz-ort').value = bz.ort || '';
+                document.getElementById('bz-fahrzeug').value = bz.fahrzeug || '';
+                document.getElementById('bz-zeit').value = bz.bestzeit || '';
+                document.getElementById('bz-spur').value = bz.spur || '';
             } else {
                 document.getElementById('bz-ort').value = '';
                 document.getElementById('bz-fahrzeug').value = '';
@@ -1265,7 +1249,7 @@
         function saveBestzeit() {
             const ort = document.getElementById('bz-ort').value.trim();
             const fahrzeug = document.getElementById('bz-fahrzeug').value.trim();
-            const index = document.getElementById('bz-index').value;
+            const indexVal = document.getElementById('bz-index').value;
 
             if (!ort || !fahrzeug) {
                 alert('Bitte mindestens Ort und Fahrzeug angeben!');
@@ -1279,8 +1263,8 @@
                 spur: document.getElementById('bz-spur').value.trim()
             };
 
-            if (index !== '') {
-                bestzeitenListe[index] = data;
+            if (indexVal !== '' && indexVal !== null && indexVal !== undefined) {
+                bestzeitenListe[parseInt(indexVal, 10)] = data;
             } else {
                 bestzeitenListe.push(data);
             }
@@ -1370,8 +1354,11 @@
         }
 
         function deleteEinkauf(index) {
-            einkaufsListe.splice(index, 1);
-            saveEinkaufsliste();
+            const artikelName = einkaufsListe[index].name;
+            if (confirm(`Möchtest du "${artikelName}" wirklich löschen?`)) {
+                einkaufsListe.splice(index, 1);
+                saveEinkaufsliste();
+            }
         }
 
         function clearEinkaufsliste() {
@@ -1509,7 +1496,7 @@
             fileReader.readAsText(event.target.files[0]);
         }
 
-        // --- WISCHGESTE (SWIPE RIGHT ZURÜCK) ---
+        // --- WISCHGESTE ---
         let touchStartX = 0;
         let touchStartY = 0;
 
@@ -1522,7 +1509,6 @@
             let touchEndX = e.changedTouches[0].screenX;
             let touchEndY = e.changedTouches[0].screenY;
             
-            // Verhindert, dass Wischen in Eingabefeldern, Textareas oder Auswahllisten die Geste auslöst
             let tagName = e.target.tagName.toLowerCase();
             if (tagName === 'input' || tagName === 'textarea' || tagName === 'select') {
                 return;
@@ -1531,30 +1517,19 @@
             let deltaX = touchEndX - touchStartX;
             let deltaY = Math.abs(touchEndY - touchStartY);
 
-            // Prüfen, ob es ein Wischen nach rechts ist (mind. 60px) 
-            // und nicht versehentlich beim vertikalen Scrollen ausgelöst wurde (max 40px)
             if (deltaX > 60 && deltaY < 40) {
-                
-                // 1. Zuerst prüfen, ob ein Modal-Fenster (Pop-up/Menü) offen ist
                 const activeModals = document.querySelectorAll('.modal.active');
                 if (activeModals.length > 0) {
                     const lastModal = activeModals[activeModals.length - 1];
                     
-                    // Verhindern, dass die AGB beim Erststart aus Versehen weggewischt werden
                     if (lastModal.id === 'modal-agb' && !localStorage.getItem('agb_akzeptiert')) {
                         return; 
                     }
                     
                     closeModal(lastModal.id);
-                    
-                    // UI-Update, falls ein Unterfenster (z.B. Fahrzeug bearbeiten) über der Sammlung lag
-                    if (lastModal.id === 'modal-fahrzeug' && document.getElementById('modal-sammlung').classList.contains('active')) {
-                        renderSammlung();
-                    }
                     return;
                 }
 
-                // 2. Falls kein Fenster offen ist, regulär zur vorherigen Seite zurückgehen
                 if (navigationStack.length > 1) {
                     closeCurrentPage();
                 }
