@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SlotcarBrain v2.0</title>
+    <title>SlotcarBrain v2.04</title>
     
     <!-- PWA & iOS Meta-Tags -->
     <link rel="manifest" href="https://dom2702.github.io/SlotcarBrain/manifest.json">
@@ -52,9 +52,22 @@
             justify-content: space-between;
         }
 
+        .header-title-container {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 6px;
+        }
+
         header h1 {
             font-size: 1.2rem;
             font-weight: bold;
+        }
+
+        header .version-tag {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            font-weight: normal;
         }
 
         header .subtitle {
@@ -66,7 +79,7 @@
             background: none;
             border: none;
             color: white;
-            font-size: 1.8rem; /* Vergrößerter Zurück-Pfeil */
+            font-size: 1.8rem;
             font-weight: bold;
             cursor: pointer;
             padding: 0 12px;
@@ -220,6 +233,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .modal-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .modal-body {
@@ -444,8 +463,11 @@
     <header>
         <button class="header-btn" id="nav-back-btn" style="visibility: hidden;" onclick="closeCurrentPage()">←</button>
         <div>
-            <h1 id="app-title">SlotcarBrain</h1>
-            <div class="subtitle" id="app-subtitle">v2.0 by DM-Technik</div>
+            <div class="header-title-container">
+                <h1>SlotcarBrain</h1>
+                <span class="version-tag">V2.04</span>
+            </div>
+            <div class="subtitle" id="app-subtitle">by DM-Technik.de</div>
         </div>
         <div style="width: 40px;"></div>
     </header>
@@ -650,10 +672,12 @@
 
     <!-- SEITE: NOTIZEN -->
     <div class="container" id="screen-notizen" style="display: none;">
+        <div class="modal-header-actions" style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 8px;">
+            <button class="btn btn-small btn-danger" onclick="speichereNotizen(true)">Speichern</button>
+        </div>
         <div style="background: #fffde7; border: 1px solid #fff59d; padding: 12px; border-radius: 8px;">
             <textarea id="notizen-text" class="form-control" style="height: 350px;" placeholder="Schreibe hier deine Notizen..." oninput="speichereNotizen()"></textarea>
         </div>
-        <button class="btn" style="margin-top: 12px;" onclick="speichereNotizen(true)">💾 Speichern</button>
     </div>
 
     <!-- SEITE: ZAHNRADÜBERSICHT -->
@@ -669,7 +693,10 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="fahrzeug-modal-title">Neues Slotcar anlegen</h3>
-                <button class="header-btn" onclick="closeModal('modal-fahrzeug')">✖</button>
+                <div class="modal-header-actions">
+                    <button class="btn btn-small btn-danger" onclick="saveFahrzeug()">Speichern</button>
+                    <button class="header-btn" onclick="closeModal('modal-fahrzeug')">✖</button>
+                </div>
             </div>
             <div class="modal-body" id="fahrzeug-form-body">
                 <!-- Dynamisch erzeugte Felder -->
@@ -720,9 +747,12 @@
                 <button class="header-btn" onclick="closeModal('modal-masken-editor')">✖</button>
             </div>
             <div class="modal-body">
-                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                     <input type="text" id="neues-masken-feld" class="form-control" placeholder="Neues Feld hinzufügen">
                     <button class="btn btn-small" onclick="addMaskenFeld()">Hinzufügen</button>
+                </div>
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+                    <button class="btn btn-small btn-danger" onclick="saveMaskenFelder()">Speichern</button>
                 </div>
                 <button class="btn-small btn-secondary" style="margin-bottom: 12px;" onclick="resetMaskenFelder()">Auf Standard zurücksetzen</button>
                 <div id="masken-felder-liste" class="reorder-list"></div>
@@ -779,7 +809,7 @@
                     <p>Die Haftung des Entwicklers für leichte Fahrlässigkeit ist – soweit gesetzlich zulässig – ausgeschlossen.</p>
 
                     <h5>5. Anwendbares Recht</h5>
-                    <p>Es gilt das Recht des Landes, in dem der Entwickler seinen Wohnsitz hat.</p>
+                    <p>Es gilt das Recht des Landes, in dem den Entwickler seinen Wohnsitz hat.</p>
 
                     <hr style="margin: 15px 0;">
 
@@ -1456,7 +1486,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `slotcarbrain_backup_v2_${Date.now()}.json`);
+            downloadAnchor.setAttribute("download", `slotcarbrain_backup_v204_${Date.now()}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
@@ -1481,7 +1511,7 @@
                     }
                     if (data.einkaufsliste) {
                         einkaufsListe = data.einkaufsliste;
-                        saveData('einkaufsliste', einkaufsListe);
+                        saveData('einkaufsliste', einkaufsliste);
                     }
                     if (data.notizen !== undefined) {
                         localStorage.setItem('meine_notizen', data.notizen);
