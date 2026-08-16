@@ -6,7 +6,7 @@
     <title>SlotcarBrain v2.0</title>
     
     <!-- PWA & iOS Meta-Tags -->
-    <link rel="manifest" href="https://dom2702.github.io/CellWorks-lite/manifest.json">
+    <link rel="manifest" href="https://dom2702.github.io/SlotcarBrain/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SlotcarBrain">
@@ -870,7 +870,7 @@
         // --- SERVICE WORKER REGISTRIERUNG ---
         function registerServiceWorker() {
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('https://dom2702.github.io/CellWorks-lite/sw.js')
+                navigator.serviceWorker.register('https://dom2702.github.io/SlotcarBrain/sw.js')
                     .then(reg => console.log('Service Worker registriert:', reg))
                     .catch(err => console.error('Service Worker Fehler:', err));
             }
