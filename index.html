@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SlotcarBrain v2.06</title>
+    <title>SlotcarBrain v2.07</title>
     
     <!-- PWA & iOS Meta-Tags -->
     <link rel="manifest" href="https://dom2702.github.io/SlotcarBrain/manifest.json">
@@ -465,7 +465,7 @@
         <div>
             <div class="header-title-container">
                 <h1>SlotcarBrain</h1>
-                <span class="version-tag">V2.06</span>
+                <span class="version-tag">V2.07</span>
             </div>
             <div class="subtitle" id="app-subtitle">by DM-Technik.de</div>
         </div>
@@ -1468,8 +1468,8 @@
             alert('Eingabemaske erfolgreich gespeichert!');
         }
 
-        // --- IMPORT / EXPORT (Mit iOS-kompatibler Fallback-Lösung) ---
-        function exportData() {
+        // --- IMPORT / EXPORT (Mit iOS Native Share & Download Fallback) ---
+        async function exportData() {
             const exportObj = {
                 version: 2,
                 datum: new Date().toISOString(),
@@ -1481,71 +1481,41 @@
             };
 
             const dataStr = JSON.stringify(exportObj, null, 2);
+            const fileName = `slotcarbrain_backup_v204_${Date.now()}.json`;
+            const file = new File([dataStr], fileName, { type: 'application/json' });
+
+            // Prüfen ob das iPhone/Gerät das Teilen von Dateien unterstützt
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'SlotcarBrain Backup',
+                        text: 'Hier ist dein Backup von SlotcarBrain.'
+                    });
+                    return;
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.log('Share abgebrochen oder fehlgeschlagen:', err);
+                    } else {
+                        return; // Benutzer hat Abbrechen gedrückt
+                    }
+                }
+            }
+
+            // Fallback für Browser/PCs mit direktem Download
+            const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.href = url;
+            downloadAnchor.download = fileName;
             
-            // Erkennung für iPhone/iPad/iPod
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-            if (isIOS) {
-                showIOSExportModal(dataStr);
-            } else {
-                const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const downloadAnchor = document.createElement('a');
-                downloadAnchor.href = url;
-                downloadAnchor.download = `slotcarbrain_backup_v204_${Date.now()}.json`;
-                
-                document.body.appendChild(downloadAnchor);
-                downloadAnchor.click();
-                
-                setTimeout(() => {
-                    document.body.removeChild(downloadAnchor);
-                    URL.revokeObjectURL(url);
-                }, 100);
-            }
-        }
-
-        function showIOSExportModal(jsonString) {
-            let modal = document.getElementById('modal-ios-export');
-            if (!modal) {
-                modal = document.createElement('div');
-                modal.id = 'modal-ios-export';
-                modal.className = 'modal';
-                modal.innerHTML = `
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>iPhone Backup-Daten</h3>
-                            <button class="header-btn" onclick="closeModal('modal-ios-export')">✖</button>
-                        </div>
-                        <div class="modal-body">
-                            <p style="font-size: 0.85rem; margin-bottom: 8px; color: #666;">
-                                Da iOS direkte Datei-Downloads einschränkt, kopiere bitte den Code und sichere ihn z.B. in deiner Notizen-App:
-                            </p>
-                            <textarea id="ios-export-text" class="form-control" style="height: 250px; font-family: monospace; font-size: 11px;" readonly></textarea>
-                        </div>
-                        <div class="modal-footer" style="flex-direction: column; gap: 8px;">
-                            <button class="btn btn-small" style="width: 100%;" onclick="copyIOSExport()">📋 In Zwischenablage kopieren</button>
-                            <button class="btn btn-small btn-secondary" style="width: 100%;" onclick="closeModal('modal-ios-export')">Schließen</button>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-            }
-
-            document.getElementById('ios-export-text').value = jsonString;
-            openModal('modal-ios-export');
-        }
-
-        function copyIOSExport() {
-            const textarea = document.getElementById('ios-export-text');
-            textarea.select();
-            textarea.setSelectionRange(0, 99999);
-            try {
-                navigator.clipboard.writeText(textarea.value).then(() => {
-                    alert('Backup-Code in die Zwischenablage kopiert!');
-                });
-            } catch (err) {
-                alert('Bitte den Text manuell markieren und kopieren.');
-            }
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(downloadAnchor);
+                URL.revokeObjectURL(url);
+            }, 100);
         }
 
         function importData(event) {
@@ -1579,7 +1549,9 @@
                     alert('Fehler beim Importieren der Datei.');
                 }
             };
-            fileReader.readAsText(event.target.files[0]);
+            if(event.target.files[0]) {
+                fileReader.readAsText(event.target.files[0]);
+            }
         }
 
         // --- WISCHGESTE ---
